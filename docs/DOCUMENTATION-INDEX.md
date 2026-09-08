@@ -83,6 +83,8 @@ Status: **SPECIFIED.** Every authoritative document is linked here. No document 
 | docs/implementation/ROADMAP.md | EXISTING |
 | docs/implementation/TRACEABILITY-MATRIX.md | EXISTING |
 | docs/implementation/STATUS.md (status classification + blockers) | EXISTING |
+| docs/implementation/BUILD-BASELINE.md (locked build facts + stack) | EXISTING |
+| docs/implementation/AGENT-BUILD-PROMPT.md (reusable build prompt) | EXISTING |
 
 ## Consolidated PDF
 - `docs/SAND_WORKS-specification.pdf` (generated consolidated deliverable) — see CHANGELOG.
