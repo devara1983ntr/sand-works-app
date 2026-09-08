@@ -86,3 +86,4 @@ Status: **SPECIFIED.** Every authoritative document is linked here. No document 
 
 ## Consolidated PDF
 - `docs/SAND_WORKS-specification.pdf` (generated consolidated deliverable) — see CHANGELOG.
+| docs/FINAL-AUDIT-REPORT.md | evidence-based final audit | EXISTING |
