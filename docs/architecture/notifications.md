@@ -1,32 +1,41 @@
-# Notifications & Alerts — SAND WORKS
+# Notifications & Emergency Warning — SAND WORKS
 
-Notifications are **online** (Firebase Cloud Messaging) and **role/user-targeted**. A notification is sent by the backend and targets a specific user; it never contains another person's private money figures.
+Status: **SPECIFIED.** FCM-based, online. Backend-authoritative. Honest about Android limits.
 
-## Notification types
-| Type | Recipient | Purpose |
+## 1. Types
+| Type | Purpose | Recipient |
 |---|---|---|
-| A Daily earnings summary | each eligible user | accrued-totals summary for the day ("earnings added / summary" wording) |
-| B Operational alert | recipients chosen by owner | owner's high-priority warning |
-| C Approval outcome | applicant | account approved or rejected |
-| D Trip assignment | driver/labourer | assigned to a trip/operational role |
-| E Temporary-assignment expiry | assignee | temp access has ended |
-| F Operational / other | relevant user | general operational notice |
+| A | **Daily accrued-money summary** (wording: accrued, never "payment") | each eligible user |
+| B | Operational/emergency warning (owner) | chosen recipients |
+| C | Approval outcome | applicant |
+| D | Trip assignment | driver/labourer |
+| E | Temporary-assignment expiry | assignee |
+| F | Operational/system-account | relevant user |
 
-## Owner alert (SC-OWN-ALERT)
-- **Who sends:** owner only.
-- **Recipients:** drivers/labourers/approved users.
-- **Presentation:** high priority; vibration; custom alert sound; heads-up where the OS permits; a **prominent in-app alert** that requires acknowledgement/dismissal.
-- **Honest platform limits:** the app never claims to override silent/DND or force volume (no unsafe volume tricks); full-screen intents are restricted; acknowledgement is recorded.
-- **Shown metadata:** sender, timestamp, recipients, message.
+## 2. Normal notifications
+Approve account/access-change/trip/daily-accrual-summary/operational/system events → targeted per user, sent by backend. No private-financial cross-broadcast (never include another user's money).
 
-## Deep links from notifications
-Opening a notification routes to the relevant screen **after** re-validating auth + role + org + ownership + existence. If not allowed, an honest Forbidden/NotFound state is shown.
+## 3. Owner-only broadcast & Emergency Warning
+- Only OWNER can send broadcast messages/warnings.
+- Emergency Warning flow: **warning button → confirmation step → optional message → recipient scope → delivery state → retry → duplicate prevention → history → audit → cancellation where possible.**
 
-## Read state
-Notifications track read state; unread is shown in the notification centre and as a badge where appropriate.
+## 4. Urgent behaviour — strongest Android-compliant (honest)
+Use a **high-importance notification channel**, with:
+- **vibration** (when device permits)
+- **notification sound / alert sound** (when device/OS permits)
+- **heads-up notification** (where the OS allows)
+- **full-screen intent only where legally/platform appropriate** (restricted).
+Accurately distinguish: vibration · notification sound · heads-up · high-importance channel · full-screen intent · device volume · Silent mode · Do Not Disturb · Android permission/policy restrictions.
 
-## Rules
-- Sent by the backend (Cloud Functions) — the client cannot forge a notification from another user or the owner.
-- Per-user targeting; **no private-financial cross-broadcast**.
-- Approved copy wording is used (no fabricated strings).
-- Permission asked with rationale + in-app settings; no broad upfront request beyond what is needed.
+**The app never claims it can force a phone to play at full volume while Silent/DND, bypass Do Not Disturb, or override the user's sound settings.** Document the cases where Android prevents the app from overriding system policy; the app provides the strongest compliant behaviour and tells the user to enable the channel/permissions for best effect.
+
+## 5. Read state, retention, channel model
+- Notification centre with read/unread; badge. Deep link → re-validate then route.
+- Channels: Earnings/Summary, Alerts/Warnings, System/Account, Operational.
+- Retention per org prefs (history).
+
+## 6. Permission handling
+- POST_NOTIFICATIONS requested with rationale + in-app settings; no over-broad upfront demand. If denied, features degrade honestly (user may enable later).
+
+## 7. Plan dependency
+Real FCM push requires Firebase project + FCM creds (owner-provisioned). Not fabricated; document fallback if absent (in-app notification centre still works; real push pending).
