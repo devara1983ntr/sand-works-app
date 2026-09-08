@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "635230546747",
+    "firebase_url": "https://sand-works-default-rtdb.firebaseio.com",
+    "project_id": "sand-works",
+    "storage_bucket": "sand-works.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635230546747:android:6f56bbe199da358373a51e",
+        "android_client_info": {
+          "package_name": "com.roshan.sandworks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "635230546747-4ob5tp1u9u3sppv7lsf0oirdpp2b4kn9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWrL4TqU2NO5hI1V85JTfUH2ca2zJ6swM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "635230546747-4ob5tp1u9u3sppv7lsf0oirdpp2b4kn9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
