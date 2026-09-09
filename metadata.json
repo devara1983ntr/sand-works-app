@@ -1,0 +1,6 @@
+{
+  "name": "SAND WORKS",
+  "description": "Operational tracking, trip logging, and daily accrued-money management for owner, drivers, and labourers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

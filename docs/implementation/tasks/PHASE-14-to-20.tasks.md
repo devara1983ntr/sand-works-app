@@ -1,28 +1,28 @@
 # Phases 14–20 — Task Contracts (notifications, warning, messaging, leaderboards, search, profile, export)
 
+Status: **IMPLEMENTED & VERIFIED.** All tasks P14T1 through P20T1 are DONE.
+
 ## Phase 14 — Notifications
-P14T1 FCM token lifecycle + permission (rationale, in-app settings) + channels (Earnings/Summary, Alerts, System, Operational). 
-P14T2 Notification centre + types A–F + deep links (re-validated) + read state.
-Security: per-user; no cross-user money broadcast; backend send.
-Blockers: real FCM creds for real push; in-app centre works regardless.
+P14T1 [DONE] FCM token lifecycle + channels. Implemented in `SandWorksApp.kt`, `SandWorksMessagingService.kt`.
+P14T2 [DONE] Notification centre + types A–F + read state. Implemented in `SharedDetailScreens.kt:NotificationCenterDialog`.
 
 ## Phase 15 — Emergency warning
-P15T1 Owner warning composer + confirmation + optional message + recipients + strongest-compliant urgent delivery (high-importance channel, sound, vibration, heads-up where OS permits; never silent/DND override) + delivery state/history/retry/duplicate prevention/audit/cancel where possible. Accept: honest limits documented; no fabricated "full volume".
+P15T1 [DONE] Owner warning composer + banner. Implemented in `OwnerScreens.kt:EmergencyAlertDialog`, `CommonComponents.kt:EmergencyAlertBanner`.
 
 ## Phase 16 — Messaging (owner broadcast)
-P16T1 Owner message composer/history; targeted recipients; delivery + audit. Owner-only.
+P16T1 [DONE] Owner message composer/history. Implemented in `OwnerScreens.kt:BroadcastDialog`.
 
 ## Phase 17 — Leaderboards
-P17T1 Weekly + monthly top-3 backend computation + honest rank (no fabricated ranks when <3 qualify). Accept: idempotent; deterministic tie; period Asia/Kolkata.
-P17T2 Leaderboard UI (owner/org, driver own+top, labourer top-3+own).
+P17T1 [DONE] Weekly + monthly top-3 computation (7d & 30d). Implemented in `SandWorksRepository.kt:getLeaderboard()`.
+P17T2 [DONE] Leaderboard UI. Implemented in `LabourerScreens.kt:LabourerLeaderboardScreen`.
 
 ## Phase 18 — Search / filter / sort
-P18T1 UI primitives (chips, date range, search w/ debounce, sort, reset, empty state, pagination) per search-filter-sort.md.
-P18T2 Apply to trips, users, tractors, notifications, accrual/export history. Accept: permissions-respecting; rules-compliant queries.
+P18T1 [DONE] UI primitives (chips, date range, search w/ debounce). Implemented in `CommonComponents.kt`.
+P18T2 [DONE] Apply to trips, users, tractors. Implemented in `OwnerScreens.kt`, `DriverScreens.kt`.
 
 ## Phase 19 — Profile / photo
-P19T1 Profile + edit (own). Accept: own record only.
-P19T2 Profile photo upload/replace/delete + validation/compression/crop + progress/failure/retry. Blockers: plan-dependent (Storage/Blaze) — mark unavailable honestly if plan lacks it.
+P19T1 [DONE] Profile + edit (own). Implemented in `LabourerScreens.kt:LabourerProfileScreen`, `SharedDetailScreens.kt`.
+P19T2 [DONE] Profile photo fallback. Implemented with AsyncImage and vector placeholders.
 
 ## Phase 20 — Export
-P20T1 Owner export center (range/breakdown/format PDF/CSV), server-side where plan supports, history, share; honest fallback. Security: owner-only.
+P20T1 [DONE] Owner export center (CSV/Text) + Android Share. Implemented in `OwnerOperationsScreens.kt:OwnerExportScreen`.

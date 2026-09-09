@@ -1,0 +1,166 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return isAuthenticated() &&
+        (request.auth.token.role == 'OWNER' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'OWNER');
+    }
+
+    function isActiveUser() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'ACTIVE';
+    }
+
+    function isDriver() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'DRIVER';
+    }
+
+    function isUser(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isDateClosed(dateStr) {
+      return exists(/databases/$(database)/documents/daily_closures/$( 'closure_' + dateStr ));
+    }
+
+    // Temporary Driver Access Verification
+    function hasValidTemporaryDriverAccess(tempAssignmentId) {
+      return tempAssignmentId != null &&
+             exists(/databases/$(database)/documents/temp_assignments/$(tempAssignmentId)) &&
+             get(/databases/$(database)/documents/temp_assignments/$(tempAssignmentId)).data.targetUserId == request.auth.uid &&
+             get(/databases/$(database)/documents/temp_assignments/$(tempAssignmentId)).data.status == 'ACTIVE' &&
+             get(/databases/$(database)/documents/temp_assignments/$(tempAssignmentId)).data.expiryTime > request.time.toMillis();
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      // Allow registration: strictly PENDING status and non-OWNER role to prevent self-escalation
+      allow create: if isAuthenticated() && 
+                    isUser(userId) && 
+                    request.resource.data.uid == userId &&
+                    request.resource.data.status == 'PENDING' &&
+                    request.resource.data.role != 'OWNER';
+      // Only Owner can change role or status. Regular users can only update basic profile fields.
+      allow update: if isOwner() || 
+                    (isUser(userId) && 
+                     !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'uid', 'email', 'approvedAt']));
+      allow delete: if false; // Soft-delete/deactivation only
+    }
+
+    // Tractors Collection
+    match /tractors/{tractorId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner();
+    }
+
+    // Trips Collection
+    match /trips/{tripId} {
+      allow read: if isAuthenticated() && (
+        isOwner() ||
+        resource.data.driverId == request.auth.uid ||
+        resource.data.labourerIds.hasAny([request.auth.uid])
+      );
+
+      // Create trip rules:
+      // 1. Must be Owner, or Active Driver, or Labourer with active non-expired temporary assignment.
+      // 2. Retroactive trip addition is strictly prohibited if date is already closed!
+      // 3. Positive rate snapshot required.
+      allow create: if isAuthenticated() && (
+        isOwner() ||
+        (request.resource.data.driverId == request.auth.uid && isActiveUser() && (
+          isDriver() || hasValidTemporaryDriverAccess(request.resource.data.tempAssignmentId)
+        ))
+      ) && 
+      !isDateClosed(request.resource.data.date) &&
+      request.resource.data.rateSnapshotPaise > 0 &&
+      request.resource.data.status == 'ACTIVE';
+
+      // Updates:
+      // Once voided, a trip cannot be edited or un-voided.
+      // Only Owner can void trips, requiring a non-empty voidReason string.
+      // Financial fields cannot be tampered with.
+      allow update: if isOwner() &&
+                    resource.data.status != 'VOIDED' &&
+                    request.resource.data.status == 'VOIDED' &&
+                    request.resource.data.voidReason is string &&
+                    request.resource.data.voidReason.size() > 0 &&
+                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['tripNumber', 'sharesPaise', 'rateSnapshotPaise', 'totalPoolPaise', 'driverId', 'tractorId']);
+
+      allow delete: if false;
+    }
+
+    // Temporary Assignments Collection
+    match /temp_assignments/{assignmentId} {
+      allow read: if isAuthenticated() && (
+        isOwner() ||
+        resource.data.targetUserId == request.auth.uid
+      );
+      allow write: if isOwner();
+    }
+
+    // Attendance Collection
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated() && (
+        isOwner() ||
+        resource.data.userId == request.auth.uid
+      );
+      allow write: if isOwner();
+    }
+
+    // Daily Closures Collection
+    match /daily_closures/{closureId} {
+      allow read: if isAuthenticated();
+      // Server/Owner writes only; cannot overwrite finalized closure with non-owner
+      allow write: if isOwner();
+    }
+
+    // Leaderboards Collection
+    match /leaderboards/{boardId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner();
+    }
+
+    // Idempotency Keys Collection
+    match /idempotency_keys/{key} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // Metadata & Counters Collection
+    match /metadata/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner();
+    }
+
+    // Emergency Alerts Collection
+    match /emergency_alerts/{alertId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner();
+      allow update: if isAuthenticated() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['acknowledgedUserIds']);
+      allow delete: if isOwner();
+    }
+
+    // Broadcast Messages Collection
+    match /broadcast_messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner();
+    }
+
+    // Audit Logs Collection
+    match /audit_logs/{logId} {
+      allow read: if isOwner();
+      // Users can only append audit records tied to their own authenticated UID
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}
