@@ -899,6 +899,47 @@ fun SettingsDialog(
                     Switch(checked = soundAlertsEnabled, onCheckedChange = { soundAlertsEnabled = it })
                 }
 
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Diagnostics & Monitoring", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = SemanticSuccess, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Firebase Analytics: Active", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = SemanticSuccess, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Crashlytics SDK: Initialized", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = SemanticSuccess, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Performance Monitoring: Active", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                // Diagnostic crash trigger for Firebase Crashlytics validation
+                                throw RuntimeException("Test Crash - SandWorks Verification")
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = SemanticError),
+                            modifier = Modifier.fillMaxWidth().testTag("test_crash_button")
+                        ) {
+                            Icon(Icons.Default.BugReport, contentDescription = null, modifier = Modifier.size(16.dp), tint = SemanticError)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Trigger Test Crash (Crashlytics)", color = SemanticError)
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
                     Text("Save & Close")

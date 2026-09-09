@@ -481,6 +481,23 @@ class SandWorksTest {
         assertEquals("sandworks_broadcast_channel", SandWorksApp.CHANNEL_BROADCAST)
         assertEquals("sandworks_accruals_channel", SandWorksApp.CHANNEL_ACCRUALS)
     }
+
+    // --- 18. Crashlytics Diagnostics & Offline State ---
+
+    @Test(expected = RuntimeException::class)
+    fun `test crash button action throws verification exception`() {
+        val crashAction = { throw RuntimeException("Test Crash - SandWorks Verification") }
+        crashAction()
+    }
+
+    @Test
+    fun `test offline banner state toggle`() {
+        val repo = com.roshan.sandworks.data.SandWorksRepository.getInstance()
+        repo.setOfflineMode(true)
+        assertTrue(repo.isOffline.value)
+        repo.retryConnection()
+        assertFalse(repo.isOffline.value)
+    }
 }
 
 

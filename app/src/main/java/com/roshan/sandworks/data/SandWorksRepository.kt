@@ -93,6 +93,19 @@ open class SandWorksRepository(
     private val _currentTripRatePaise = MutableStateFlow(MoneyEngine.DEFAULT_TRIP_RATE_PAISE)
     val currentTripRatePaise: StateFlow<Long> = _currentTripRatePaise.asStateFlow()
 
+    // Network / Offline state indicator
+    private val _isOffline = MutableStateFlow(false)
+    val isOffline: StateFlow<Boolean> = _isOffline.asStateFlow()
+
+    fun setOfflineMode(offline: Boolean) {
+        _isOffline.value = offline
+    }
+
+    fun retryConnection() {
+        _isOffline.value = false
+        checkCurrentAuth()
+    }
+
     init {
         checkCurrentAuth()
     }

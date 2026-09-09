@@ -40,6 +40,7 @@ fun MainAppContent(repository: SandWorksRepository) {
     val currentUser by repository.currentUser.collectAsState()
     val emergencyAlerts by repository.emergencyAlerts.collectAsState()
     val notifications by repository.notifications.collectAsState()
+    val isOffline by repository.isOffline.collectAsState()
 
     var authScreen by remember { mutableStateOf("welcome") } // "welcome", "signin", "signup"
     var signInError by remember { mutableStateOf<String?>(null) }
@@ -174,6 +175,10 @@ fun MainAppContent(repository: SandWorksRepository) {
             ) { padding ->
                 Surface(modifier = Modifier.padding(padding)) {
                     Column {
+                        OfflineNoticeBanner(
+                            isOffline = isOffline,
+                            onReconnectClick = { repository.retryConnection() }
+                        )
                         if (activeUnackAlert != null) {
                             EmergencyAlertBanner(
                                 alert = activeUnackAlert,
@@ -221,6 +226,10 @@ fun MainAppContent(repository: SandWorksRepository) {
             ) { padding ->
                 Surface(modifier = Modifier.padding(padding)) {
                     Column {
+                        OfflineNoticeBanner(
+                            isOffline = isOffline,
+                            onReconnectClick = { repository.retryConnection() }
+                        )
                         if (activeUnackAlert != null) {
                             EmergencyAlertBanner(
                                 alert = activeUnackAlert,
@@ -272,6 +281,10 @@ fun MainAppContent(repository: SandWorksRepository) {
             ) { padding ->
                 Surface(modifier = Modifier.padding(padding)) {
                     Column {
+                        OfflineNoticeBanner(
+                            isOffline = isOffline,
+                            onReconnectClick = { repository.retryConnection() }
+                        )
                         if (activeUnackAlert != null) {
                             EmergencyAlertBanner(
                                 alert = activeUnackAlert,
