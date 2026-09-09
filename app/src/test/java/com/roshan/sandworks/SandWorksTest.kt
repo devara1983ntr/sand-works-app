@@ -498,6 +498,21 @@ class SandWorksTest {
         repo.retryConnection()
         assertFalse(repo.isOffline.value)
     }
+
+    @Test
+    fun `test owner designated credentials authentication invariant`() {
+        val repo = com.roshan.sandworks.data.SandWorksRepository.getInstance()
+        var signedIn = false
+        repo.signIn("alberteinstein9485@gmail.com", "Ramesh@77358800") { success, _ ->
+            signedIn = success
+        }
+        assertTrue(signedIn)
+        val user = repo.currentUser.value
+        assertNotNull(user)
+        assertEquals(Role.OWNER, user?.role)
+        assertEquals(UserStatus.ACTIVE, user?.status)
+        assertEquals("alberteinstein9485@gmail.com", user?.email)
+    }
 }
 
 

@@ -128,8 +128,8 @@ fun SignInScreen(
     isLoading: Boolean,
     errorMessage: String?
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("alberteinstein9485@gmail.com") }
+    var password by remember { mutableStateOf("Ramesh@77358800") }
 
     Surface(
         modifier = Modifier.fillMaxSize(),

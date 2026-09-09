@@ -512,7 +512,7 @@ fun OfflineNoticeBanner(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Working Offline • Changes queue locally",
+                        text = "Working Offline • Tap Retry to reconnect",
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurface
                     )

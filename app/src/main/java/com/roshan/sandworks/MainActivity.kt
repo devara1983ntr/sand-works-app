@@ -1,9 +1,13 @@
 package com.roshan.sandworks
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -41,6 +45,17 @@ fun MainAppContent(repository: SandWorksRepository) {
     val emergencyAlerts by repository.emergencyAlerts.collectAsState()
     val notifications by repository.notifications.collectAsState()
     val isOffline by repository.isOffline.collectAsState()
+
+    // Runtime permission launcher for notifications on Android 13+ (API 33+)
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { _ -> }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     var authScreen by remember { mutableStateOf("welcome") } // "welcome", "signin", "signup"
     var signInError by remember { mutableStateOf<String?>(null) }
