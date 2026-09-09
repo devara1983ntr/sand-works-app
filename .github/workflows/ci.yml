@@ -1,0 +1,98 @@
+name: CI/CD & Automated Quality Gates
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Continuous scheduled security and dependency check every Monday at 04:00 UTC
+    - cron: '0 4 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-build-and-test:
+    name: Android Build & JVM Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Run Android Unit & Robolectric Tests
+        run: ./gradlew testDebugUnitTest --continue
+
+      - name: Assemble Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-results
+          path: app/build/reports/tests/
+
+  backend-verification:
+    name: Cloud Functions & Rules Invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install Functions Dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Run Backend Invariant Tests
+        run: node --test functions/test/backend.test.js
+
+      - name: Verify TypeScript Compilation
+        working-directory: functions
+        run: npx tsc --noEmit
+
+  security-and-secret-scan:
+    name: DevSecOps Secret & Invariant Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Audit Accrual Wording Guard (Zero Payment/Wage UI occurrences)
+        run: |
+          echo "Scanning codebase for prohibited payment terminology in UI..."
+          ! grep -rnIE "payment|paid|wages" app/src/main/java/com/roshan/sandworks/ui/ || {
+            echo "FAILED: Prohibited accrual wording detected in UI!"
+            exit 1
+          }
+          echo "Accrual wording audit passed."
+
+      - name: Audit Floating Point Money Prevention
+        run: |
+          echo "Checking MoneyEngine for forbidden floating-point money primitives..."
+          ! grep -rnIE "Float|Double" app/src/main/java/com/roshan/sandworks/domain/MoneyEngine.kt || {
+            echo "FAILED: Float/Double detected in MoneyEngine!"
+            exit 1
+          }
+          echo "Financial integrity check passed."
